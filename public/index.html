@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DriveCo Администрация</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a2a6c,#2c3e50,#1a2a6c);color:#fff;padding:15px 30px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,0.3)}
+.header h1{font-size:22px}
+.header span{font-size:14px}
+.header a{color:#e74c3c;text-decoration:none;margin-left:15px}
+.nav{background:#2c3e50;padding:0 20px;display:flex;flex-wrap:wrap;gap:0}
+.nav a{color:#bdc3c7;text-decoration:none;padding:14px 18px;display:inline-block;font-size:14px;transition:.2s;border-bottom:3px solid transparent}
+.nav a:hover{color:#fff;background:rgba(255,255,255,0.05)}
+.nav a.active{color:#fff;border-bottom-color:#1abc9c;font-weight:bold}
+.content{padding:25px;max-width:1300px;margin:0 auto}
+.login-box{max-width:420px;margin:80px auto;background:#fff;padding:35px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.15)}
+.login-box h2{text-align:center;margin-bottom:25px;color:#2c3e50}
+.login-box input{width:100%;padding:12px;margin:10px 0;border:2px solid #e0e0e0;border-radius:6px;font-size:15px;transition:.2s}
+.login-box input:focus{border-color:#1abc9c;outline:none}
+.btn{background:#1abc9c;color:#fff;border:none;padding:10px 20px;cursor:pointer;border-radius:6px;font-size:14px;transition:.2s;display:inline-flex;align-items:center;gap:5px}
+.btn:hover{background:#16a085;transform:translateY(-1px)}
+.btn-red{background:#e74c3c}.btn-red:hover{background:#c0392b}
+.btn-blue{background:#3498db}.btn-blue:hover{background:#2980b9}
+.btn-orange{background:#e67e22}.btn-orange:hover{background:#d35400}
+.btn-sm{padding:6px 12px;font-size:12px}
+table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 5px rgba(0,0,0,0.1);margin-top:15px}
+th,td{padding:12px 15px;border-bottom:1px solid #eee;text-align:left;font-size:13px}
+th{background:#34495e;color:#fff;font-weight:600;cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{background:#2c3e50}
+th .sort-icon{font-size:10px;margin-left:3px}
+tr:hover{background:#f8f9fa}
+.form-row{margin:12px 0}
+.form-row label{display:block;margin-bottom:5px;font-weight:600;color:#333;font-size:13px}
+.form-row input,.form-row select,.form-row textarea{width:100%;padding:10px;border:2px solid #e0e0e0;border-radius:6px;font-size:14px;transition:.2s}
+.form-row input:focus,.form-row select:focus,.form-row textarea:focus{border-color:#1abc9c;outline:none}
+.form-row textarea{resize:vertical;min-height:60px}
+.form-row select{background:#fff;cursor:pointer}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:1000;overflow-y:auto}
+.modal-content{background:#fff;margin:30px auto;padding:25px;max-width:700px;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.3);animation:slideIn .3s ease}
+@keyframes slideIn{from{transform:translateY(-30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-header h3{margin:0;color:#2c3e50}
+.modal-close{cursor:pointer;font-size:24px;color:#999;transition:.2s}
+.modal-close:hover{color:#e74c3c}
+.search-box{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.search-box input{flex:1;min-width:200px;padding:10px;border:2px solid #e0e0e0;border-radius:6px;font-size:14px}
+.search-box select{padding:10px;border:2px solid #e0e0e0;border-radius:6px;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:30px}
+.stat-box{background:#fff;padding:25px;border-radius:10px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.08);transition:.2s}
+.stat-box:hover{transform:translateY(-3px);box-shadow:0 5px 20px rgba(0,0,0,0.12)}
+.stat-box h2{color:#1abc9c;font-size:36px;margin-bottom:8px}
+.stat-box p{color:#666;font-size:14px}
+.stat-box .sub{font-size:12px;color:#999;margin-top:5px}
+.hidden{display:none!important}
+.toast{position:fixed;top:20px;right:20px;padding:15px 25px;border-radius:8px;color:#fff;z-index:9999;box-shadow:0 4px 15px rgba(0,0,0,0.2);animation:fadeIn .3s;font-size:14px;max-width:400px}
+.toast-success{background:#27ae60}
+.toast-error{background:#e74c3c}
+.toast-info{background:#3498db}
+@keyframes fadeIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.section-title{font-size:20px;color:#2c3e50;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:bold}
+.badge-available{background:#d4edda;color:#155724}
+.badge-sold{background:#f8d7da;color:#721c24}
+.chart-container{background:#fff;padding:20px;border-radius:10px;box-shadow:0 1px 5px rgba(0,0,0,0.1);margin-bottom:20px}
+.chart-container h4{margin-bottom:15px;color:#2c3e50}
+.chart-bar{display:flex;align-items:flex-end;gap:15px;height:200px;padding:10px 0}
+.chart-bar-item{flex:1;text-align:center}
+.chart-bar-fill{background:linear-gradient(180deg,#1abc9c,#16a085);border-radius:4px 4px 0 0;margin:0 auto;min-height:4px;transition:.5s;position:relative}
+.chart-bar-label{font-size:11px;color:#666;margin-top:5px}
+.chart-bar-value{font-size:12px;color:#333;font-weight:bold}
+.car-info-block{background:#f8f9fa;padding:12px;border-radius:6px;margin:10px 0;border-left:4px solid #1abc9c}
+.car-info-block b{color:#2c3e50}
+.contract-preview{background:#fff;border:2px solid #1abc9c;padding:25px;border-radius:8px;margin:20px 0;font-size:13px;line-height:1.8}
+.contract-preview h3{text-align:center;margin-bottom:15px}
+@media print{
+  .header,.nav,.btn,.search-box,.modal{display:none!important}
+  .content{padding:0;max-width:100%}
+  .contract-preview{border:none;padding:0}
+}
+</style>
+</head>
+<body>
+
+<div id="loginPage">
+  <div class="login-box">
+    <h2> Вход в систему</h2>
+    <input type="text" id="loginUser" placeholder="Логин" autocomplete="off">
+    <input type="password" id="loginPass" placeholder="Пароль">
+    <button class="btn" onclick="login()" style="width:100%;justify-content:center;padding:12px">Войти</button>
+    <p id="loginError" style="color:#e74c3c;margin-top:12px;text-align:center;font-size:13px"></p>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <div class="header">
+    <h1> DriveCo Администрация</h1>
+    <span> Администратор <a href="#" onclick="logout()">Выйти</a></span>
+  </div>
+  <div class="nav" id="navbar">
+    <a href="#" onclick="showTab('dashboard')" class="active" data-tab="dashboard"> Главная</a>
+    <a href="#" onclick="showTab('cars')" data-tab="cars"> Автомобили</a>
+    <a href="#" onclick="showTab('clients')" data-tab="clients"> Клиенты</a>
+    <a href="#" onclick="showTab('employees')" data-tab="employees"> Сотрудники</a>
+    <a href="#" onclick="showTab('suppliers')" data-tab="suppliers"> Поставщики</a>
+    <a href="#" onclick="showTab('sales')" data-tab="sales"> Сделки</a>
+    <a href="#" onclick="showTab('reports')" data-tab="reports"> Отчёты</a>
+  </div>
+  <div class="content" id="tabContent"></div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script>
+let token = localStorage.getItem('token');
+const API = '';
+
+function toast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast toast-' + type;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), 3500);
+}
+
+async function api(url, method='GET', body=null) {
+  const opts = { method, headers: {'Content-Type':'application/json', 'Authorization':'Bearer '+token} };
+  if (body) opts.body = JSON.stringify(body);
+  try {
+    const res = await fetch(API+url, opts);
+    if (res.status === 401) { logout(); throw new Error('Сессия истекла'); }
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Ошибка сервера');
+    return data;
+  } catch(e) {
+    if (e.message !== 'Сессия истекла') toast(e.message, 'error');
+    throw e;
+  }
+}
+
+function formatPrice(p) { return Number(p).toLocaleString('ru-RU') + ' ₽'; }
+function formatDate(d) { if (!d) return ''; const dt = new Date(d); return dt.toLocaleDateString('ru-RU'); }
+
+async function login() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (!u || !p) { document.getElementById('loginError').textContent = 'Заполните все поля'; return; }
+  try {
+    const res = await fetch(API+'/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username:u, password:p}) });
+    const data = await res.json();
+    if (res.ok) {
+      token = data.token; localStorage.setItem('token', token);
+      document.getElementById('loginPage').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+      showTab('dashboard');
+    } else {
+      document.getElementById('loginError').textContent = data.error;
+    }
+  } catch(e) { document.getElementById('loginError').textContent = 'Ошибка соединения с сервером'; }
+}
+
+function logout() { localStorage.removeItem('token'); location.reload(); }
+
+function showTab(tab) {
+  document.querySelectorAll('#navbar a').forEach(a => a.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`)?.classList.add('active');
+  const c = document.getElementById('tabContent');
+  switch(tab) {
+    case 'dashboard': loadDashboard(c); break;
+    case 'cars': loadCars(c); break;
+    case 'clients': loadClients(c); break;
+    case 'employees': loadEmployees(c); break;
+    case 'suppliers': loadSuppliers(c); break;
+    case 'sales': loadSales(c); break;
+    case 'reports': loadReports(c); break;
+  }
+}
+
+async function loadDashboard(c) {
+  c.innerHTML = '<p>Загрузка...</p>';
+  try {
+    const d = await api('/api/dashboard');
+    c.innerHTML = `
+      <div class="section-title"> Панель управления</div>
+      <div class="stats">
+        <div class="stat-box"><h2>${d.availableCars}</h2><p>Автомобилей в наличии</p></div>
+        <div class="stat-box"><h2>${d.totalClients}</h2><p>Клиентов в базе</p></div>
+        <div class="stat-box"><h2>${d.monthSales.count}</h2><p>Сделок за месяц</p><div class="sub">${formatPrice(d.monthSales.total || 0)}</div></div>
+        <div class="stat-box"><h2>${d.totalEmployees}</h2><p>Сотрудников</p></div>
+      </div>
+
+      <div class="chart-container"><h4> Продажи по месяцам</h4>
+        <div class="chart-bar">${(d.salesByMonth||[]).reverse().map(m => {
+          const max = Math.max(...(d.salesByMonth||[]).map(x=>x.total), 1);
+          const h = (m.total/max*180) || 4;
+          return `<div class="chart-bar-item"><div class="chart-bar-value">${formatPrice(m.total)}</div>
+            <div class="chart-bar-fill" style="height:${h}px;width:60px"></div>
+            <div class="chart-bar-label">${m.month}</div></div>`;
+        }).join('')}</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="chart-container"><h4> Топ менеджеров (за месяц)</h4>
+          ${d.topEmployees?.length ? d.topEmployees.map((e,i) => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee">
+            <span>${i+1}. ${e.full_name}</span><span><b>${e.count} сделок</b> — ${formatPrice(e.total)}</span></div>`).join('') : '<p>Нет данных</p>'}
+        </div>
+        <div class="chart-container"><h4> Последние сделки</h4>
+          ${d.recentSales?.length ? d.recentSales.map(s => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee">
+            <span>${formatDate(s.sale_date)}</span><span>${s.brand} ${s.model}</span><span><b>${formatPrice(s.final_price)}</b></span></div>`).join('') : '<p>Нет сделок</p>'}
+        </div>
+      </div>`;
+  } catch(e) { c.innerHTML = '<p style="color:red">Ошибка загрузки</p>'; }
+}
+
+let carsSortBy = 'id', carsSortOrder = 'desc';
+
+async function loadCars(c) {
+  const [cars, brands, suppliers] = await Promise.all([
+    api(`/api/cars?sortBy=${carsSortBy}&sortOrder=${carsSortOrder}`),
+    api('/api/cars/brands'),
+    api('/api/suppliers')
+  ]);
+  c.innerHTML = `
+    <div class="section-title"> Автомобили <button class="btn" onclick="openCarModal()">+ Добавить</button></div>
+    <div class="search-box">
+      <input id="carSearch" placeholder=" Поиск по VIN, марке, модели" oninput="searchCars()">
+      <select id="carStatusFilter" onchange="searchCars()"><option value="all">Все статусы</option><option value="available">В наличии</option><option value="sold">Продан</option></select>
+      <select id="carBrandFilter" onchange="searchCars()"><option value="all">Все марки</option>${brands.map(b=>`<option value="${b}">${b}</option>`).join('')}</select>
+      <button class="btn btn-blue" onclick="exportCarsExcel()"> Excel</button>
+    </div>
+    <table><thead><tr>
+      <th onclick="sortCars('vin')">VIN <span class="sort-icon">${carsSortBy==='vin'?(carsSortOrder==='asc'?'▲':'▼'):''}</span></th>
+      <th onclick="sortCars('brand')">Марка <span class="sort-icon">${carsSortBy==='brand'?(carsSortOrder==='asc'?'▲':'▼'):''}</span></th>
+      <th onclick="sortCars('model')">Модель <span class="sort-icon">${carsSortBy==='model'?(carsSortOrder==='asc'?'▲':'▼'):''}</span></th>
+      <th onclick="sortCars('year')">Год <span class="sort-icon">${carsSortBy==='year'?(carsSortOrder==='asc'?'▲':'▼'):''}</span></th>
+      <th onclick="sortCars('price')">Цена <span class="sort-icon">${carsSortBy==='price'?(carsSortOrder==='asc'?'▲':'▼'):''}</span></th>
+      <th onclick="sortCars('status')">Статус <span class="sort-icon">${carsSortBy==='status'?(carsSortOrder==='asc'?'▲':'▼'):''}</span></th>
+      <th>Поставщик</th><th>Действия</th>
+    </tr></thead><tbody id="carsTableBody"></tbody></table>
+    <div id="carModal" class="modal"><div class="modal-content">
+      <div class="modal-header"><h3 id="carModalTitle">Добавить автомобиль</h3><span class="modal-close" onclick="closeCarModal()">&times;</span></div>
+      <input type="hidden" id="carId">
+      <div class="form-row"><label>VIN (17 символов)</label><input id="carVin" maxlength="17" placeholder="JTNBE46KX7301234"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-row"><label>Марка</label><input id="carBrand" placeholder="Toyota"></div>
+        <div class="form-row"><label>Модель</label><input id="carModel" placeholder="Camry"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div class="form-row"><label>Год</label><input id="carYear" type="number" placeholder="2024"></div>
+        <div class="form-row"><label>Цена (₽)</label><input id="carPrice" type="number" placeholder="3500000"></div>
+        <div class="form-row"><label>Цвет</label><input id="carColor" placeholder="Белый"></div>
+      </div>
+      <div class="form-row"><label>Поставщик</label><select id="carSupplier"><option value="">Без поставщика</option>${suppliers.map(s=>`<option value="${s.id}">${s.company_name}</option>`).join('')}</select></div>
+      <div style="display:flex;gap:10px;margin-top:15px">
+        <button class="btn" onclick="saveCar()"> Сохранить</button>
+        <button class="btn btn-red" onclick="closeCarModal()">Отмена</button>
+      </div>
+    </div></div>`;
+  renderCarsTable(cars);
+  window._carSuppliers = suppliers;
+}
+
+function sortCars(field) {
+  if (carsSortBy === field) carsSortOrder = carsSortOrder === 'asc' ? 'desc' : 'asc';
+  else { carsSortBy = field; carsSortOrder = 'asc'; }
+  showTab('cars');
+}
+
+async function searchCars() {
+  const s = document.getElementById('carSearch')?.value || '';
+  const st = document.getElementById('carStatusFilter')?.value || 'all';
+  const br = document.getElementById('carBrandFilter')?.value || 'all';
+  const data = await api(`/api/cars?search=${encodeURIComponent(s)}&status=${st}&brand=${br}&sortBy=${carsSortBy}&sortOrder=${carsSortOrder}`);
+  renderCarsTable(data);
+}
+
+function renderCarsTable(data) {
+  const t = document.getElementById('carsTableBody');
+  if (!t) return;
+  t.innerHTML = data.map(c => `<tr>
+    <td>${c.vin}</td><td>${c.brand}</td><td>${c.model}</td><td>${c.year}</td>
+    <td><b>${formatPrice(c.price)}</b></td>
+    <td><span class="badge badge-${c.status==='available'?'available':'sold'}">${c.status==='available'?'В наличии':'Продан'}</span></td>
+    <td>${c.supplier || '—'}</td>
+    <td style="white-space:nowrap">
+      <button class="btn btn-sm" onclick='openCarModal(${JSON.stringify(c).replace(/'/g,"&#39;")})'>✏️</button>
+      <button class="btn btn-sm btn-red" onclick="deleteCar(${c.id},'${c.brand} ${c.model}','${c.status}')">🗑</button>
+    </td>
+  </tr>`).join('');
+}
+
+function openCarModal(car=null) {
+  document.getElementById('carId').value = car?.id || '';
+  document.getElementById('carVin').value = car?.vin || '';
+  document.getElementById('carBrand').value = car?.brand || '';
+  document.getElementById('carModel').value = car?.model || '';
+  document.getElementById('carYear').value = car?.year || '';
+  document.getElementById('carPrice').value = car?.price || '';
+  document.getElementById('carColor').value = car?.color || '';
+  document.getElementById('carSupplier').value = car?.supplier_id || '';
+  document.getElementById('carModalTitle').textContent = car ? ' Редактировать автомобиль' : ' Добавить автомобиль';
+  document.getElementById('carModal').style.display = 'block';
+}
+function closeCarModal() { document.getElementById('carModal').style.display = 'none'; }
+
+async function saveCar() {
+  const id = document.getElementById('carId').value;
+  const body = {
+    vin: document.getElementById('carVin').value.trim().toUpperCase(),
+    brand: document.getElementById('carBrand').value.trim(),
+    model: document.getElementById('carModel').value.trim(),
+    year: Number(document.getElementById('carYear').value),
+    price: Number(document.getElementById('carPrice').value),
+    color: document.getElementById('carColor').value.trim(),
+    supplier_id: document.getElementById('carSupplier').value || null
+  };
+  if (!body.vin || !body.brand || !body.model || !body.year || !body.price) {
+    return toast('Заполните все обязательные поля (VIN, марка, модель, год, цена)', 'error');
+  }
+  try {
+    await api(id ? '/api/cars/'+id : '/api/cars', id?'PUT':'POST', body);
+    toast(id ? 'Автомобиль обновлён' : 'Автомобиль добавлен', 'success');
+    closeCarModal(); showTab('cars');
+  } catch(e) {}
+}
+
+async function deleteCar(id, name, status) {
+  if (status === 'sold') return toast(`Нельзя удалить проданный автомобиль "${name}"`, 'error');
+  if (!confirm(`Удалить автомобиль "${name}"?`)) return;
+  try { await api('/api/cars/'+id, 'DELETE'); toast(`"${name}" удалён`); showTab('cars'); } catch(e) {}
+}
+
+function exportCarsExcel() {
+  const table = document.querySelector('#tabContent table');
+  if (!table) return;
+  let html = '<table>';
+  html += table.querySelector('thead').outerHTML;
+  html += table.querySelector('tbody').outerHTML;
+  html += '</table>';
+  const blob = new Blob(['\uFEFF' + html], {type: 'application/vnd.ms-excel'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'avtomobili.xls'; a.click();
+}
+
+async function loadClients(c) {
+  const data = await api('/api/clients');
+  c.innerHTML = `
+    <div class="section-title"> Клиенты <button class="btn" onclick="openClientModal()">+ Добавить</button></div>
+    <div class="search-box"><input id="clientSearch" placeholder=" Поиск по ФИО или телефону" oninput="searchClients()"></div>
+    <table><thead><tr><th>ФИО</th><th>Телефон</th><th>Паспорт</th><th>Адрес</th><th>Действия</th></tr></thead><tbody id="clientsTableBody"></tbody></table>
+    <div id="clientModal" class="modal"><div class="modal-content">
+      <div class="modal-header"><h3 id="clientModalTitle">Добавить клиента</h3><span class="modal-close" onclick="document.getElementById('clientModal').style.display='none'">&times;</span></div>
+      <input type="hidden" id="clientId">
+      <div class="form-row"><label>ФИО *</label><input id="clientName" placeholder="Иванов Иван Иванович"></div>
+      <div class="form-row"><label>Телефон *</label><input id="clientPhone" placeholder="+7-999-123-45-67"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-row"><label>Паспорт</label><input id="clientPassport" placeholder="4510 123456"></div>
+        <div class="form-row"><label>Адрес</label><input id="clientAddress" placeholder="г. Москва, ул. Ленина, д.1"></div>
+      </div>
+      <button class="btn" onclick="saveClient()"> Сохранить</button>
+      <button class="btn btn-red" onclick="document.getElementById('clientModal').style.display='none'">Отмена</button>
+    </div></div>`;
+  renderClientsTable(data);
+}
+
+function renderClientsTable(data) {
+  const t = document.getElementById('clientsTableBody');
+  if (!t) return;
+  t.innerHTML = data.map(cl => `<tr>
+    <td><b>${cl.full_name}</b></td><td>${cl.phone}</td><td>${cl.passport||'—'}</td><td>${cl.address||'—'}</td>
+    <td><button class="btn btn-sm" onclick='openClientModal(${JSON.stringify(cl).replace(/'/g,"&#39;")})'>✏️</button>
+    <button class="btn btn-sm btn-red" onclick="deleteClient(${cl.id},'${cl.full_name}')">🗑</button></td>
+  </tr>`).join('');
+}
+
+async function searchClients() {
+  const s = document.getElementById('clientSearch')?.value || '';
+  const data = await api('/api/clients?search='+encodeURIComponent(s));
+  renderClientsTable(data);
+}
+
+function openClientModal(cl=null) {
+  document.getElementById('clientId').value = cl?.id || '';
+  document.getElementById('clientName').value = cl?.full_name || '';
+  document.getElementById('clientPhone').value = cl?.phone || '';
+  document.getElementById('clientPassport').value = cl?.passport || '';
+  document.getElementById('clientAddress').value = cl?.address || '';
+  document.getElementById('clientModalTitle').textContent = cl ? ' Редактировать клиента' : ' Добавить клиента';
+  document.getElementById('clientModal').style.display = 'block';
+}
+
+async function saveClient() {
+  const id = document.getElementById('clientId').value;
+  const body = {
+    full_name: document.getElementById('clientName').value.trim(),
+    phone: document.getElementById('clientPhone').value.trim(),
+    passport: document.getElementById('clientPassport').value.trim() || null,
+    address: document.getElementById('clientAddress').value.trim() || null
+  };
+  if (!body.full_name || !body.phone) return toast('ФИО и телефон обязательны', 'error');
+  try {
+    await api(id?'/api/clients/'+id:'/api/clients', id?'PUT':'POST', body);
+    toast(id?'Клиент обновлён':'Клиент добавлен');
+    document.getElementById('clientModal').style.display = 'none';
+    showTab('clients');
+  } catch(e) {}
+}
+
+async function deleteClient(id, name) {
+  if (!confirm(`Удалить клиента "${name}"?`)) return;
+  try { await api('/api/clients/'+id,'DELETE'); toast(`"${name}" удалён`); showTab('clients'); } catch(e) {}
+}
+
+async function loadEmployees(c) {
+  const data = await api('/api/employees');
+  c.innerHTML = `
+    <div class="section-title"> Сотрудники <button class="btn" onclick="openEmpModal()">+ Добавить</button></div>
+    <table><thead><tr><th>ФИО</th><th>Должность</th><th>Телефон</th><th>Действия</th></tr></thead><tbody>${data.map(e=>`<tr>
+    <td><b>${e.full_name}</b></td><td>${e.position}</td><td>${e.phone||'—'}</td>
+    <td><button class="btn btn-sm" onclick='openEmpModal(${JSON.stringify(e).replace(/'/g,"&#39;")})'>✏️</button>
+    <button class="btn btn-sm btn-red" onclick="deleteEmp(${e.id},'${e.full_name}')">🗑</button></td></tr>`).join('')}</tbody></table>
+    <div id="empModal" class="modal"><div class="modal-content">
+      <div class="modal-header"><h3 id="empModalTitle">Добавить сотрудника</h3><span class="modal-close" onclick="document.getElementById('empModal').style.display='none'">&times;</span></div>
+      <input type="hidden" id="empId">
+      <div class="form-row"><label>ФИО *</label><input id="empName"></div>
+      <div class="form-row"><label>Должность *</label><input id="empPos"></div>
+      <div class="form-row"><label>Телефон</label><input id="empPhone"></div>
+      <button class="btn" onclick="saveEmp()"> Сохранить</button>
+      <button class="btn btn-red" onclick="document.getElementById('empModal').style.display='none'">Отмена</button>
+    </div></div>`;
+}
+
+function openEmpModal(e=null) {
+  document.getElementById('empId').value = e?.id || '';
+  document.getElementById('empName').value = e?.full_name || '';
+  document.getElementById('empPos').value = e?.position || '';
+  document.getElementById('empPhone').value = e?.phone || '';
+  document.getElementById('empModalTitle').textContent = e ? ' Редактировать' : ' Добавить';
+  document.getElementById('empModal').style.display = 'block';
+}
+async function saveEmp() {
+  const id = document.getElementById('empId').value;
+  const body = { full_name: document.getElementById('empName').value.trim(), position: document.getElementById('empPos').value.trim(), phone: document.getElementById('empPhone').value.trim() };
+  if (!body.full_name || !body.position) return toast('ФИО и должность обязательны', 'error');
+  await api(id?'/api/employees/'+id:'/api/employees', id?'PUT':'POST', body);
+  document.getElementById('empModal').style.display = 'none'; showTab('employees');
+}
+async function deleteEmp(id, name) {
+  if (!confirm(`Удалить "${name}"?`)) return;
+  await api('/api/employees/'+id,'DELETE'); showTab('employees');
+}
+
+async function loadSuppliers(c) {
+  const data = await api('/api/suppliers');
+  c.innerHTML = `
+    <div class="section-title"> Поставщики <button class="btn" onclick="openSupModal()">+ Добавить</button></div>
+    <table><thead><tr><th>Компания</th><th>ИНН</th><th>Контакт</th><th>Телефон</th><th>Действия</th></tr></thead><tbody>${data.map(s=>`<tr>
+    <td><b>${s.company_name}</b></td><td>${s.inn}</td><td>${s.contact_person||'—'}</td><td>${s.phone||'—'}</td>
+    <td><button class="btn btn-sm" onclick='openSupModal(${JSON.stringify(s).replace(/'/g,"&#39;")})'>✏️</button>
+    <button class="btn btn-sm btn-red" onclick="deleteSup(${s.id},'${s.company_name}')">🗑</button></td></tr>`).join('')}</tbody></table>
+    <div id="supModal" class="modal"><div class="modal-content">
+      <div class="modal-header"><h3 id="supModalTitle">Добавить поставщика</h3><span class="modal-close" onclick="document.getElementById('supModal').style.display='none'">&times;</span></div>
+      <input type="hidden" id="supId">
+      <div class="form-row"><label>Название *</label><input id="supName"></div>
+      <div class="form-row"><label>ИНН *</label><input id="supInn"></div>
+      <div class="form-row"><label>Контактное лицо</label><input id="supContact"></div>
+      <div class="form-row"><label>Телефон</label><input id="supPhone"></div>
+      <button class="btn" onclick="saveSup()"> Сохранить</button>
+      <button class="btn btn-red" onclick="document.getElementById('supModal').style.display='none'">Отмена</button>
+    </div></div>`;
+}
+function openSupModal(s=null) {
+  document.getElementById('supId').value = s?.id || '';
+  document.getElementById('supName').value = s?.company_name || '';
+  document.getElementById('supInn').value = s?.inn || '';
+  document.getElementById('supContact').value = s?.contact_person || '';
+  document.getElementById('supPhone').value = s?.phone || '';
+  document.getElementById('supModalTitle').textContent = s ? ' Редактировать' : ' Добавить';
+  document.getElementById('supModal').style.display = 'block';
+}
+async function saveSup() {
+  const id = document.getElementById('supId').value;
+  const body = { company_name: document.getElementById('supName').value.trim(), inn: document.getElementById('supInn').value.trim(), contact_person: document.getElementById('supContact').value.trim(), phone: document.getElementById('supPhone').value.trim() };
+  if (!body.company_name || !body.inn) return toast('Название и ИНН обязательны', 'error');
+  await api(id?'/api/suppliers/'+id:'/api/suppliers', id?'PUT':'POST', body);
+  document.getElementById('supModal').style.display = 'none'; showTab('suppliers');
+}
+async function deleteSup(id, name) {
+  if (!confirm(`Удалить "${name}"?`)) return;
+  await api('/api/suppliers/'+id,'DELETE'); showTab('suppliers');
+}
+
+let _availableCars = [], _clients = [], _employees = [];
+
+async function loadSales(c) {
+  try {
+    [_availableCars, _clients, _employees] = await Promise.all([
+      api('/api/cars/available'),
+      api('/api/clients'),
+      api('/api/employees')
+    ]);
+  } catch(e) { _availableCars=[]; _clients=[]; _employees=[]; }
+
+  const sales = await api('/api/sales');
+  c.innerHTML = `
+    <div class="section-title"> Сделки <button class="btn" onclick="openSaleModal()">+ Новая сделка</button></div>
+    <table><thead><tr><th>Дата</th><th>Автомобиль</th><th>VIN</th><th>Клиент</th><th>Сотрудник</th><th>Цена</th><th>Оплата</th><th>Действия</th></tr></thead><tbody>
+    ${sales.map(s=>`<tr>
+      <td>${formatDate(s.sale_date)}</td><td>${s.brand} ${s.model} (${s.car_year}, ${s.color||'—'})</td><td>${s.vin}</td>
+      <td>${s.client}</td><td>${s.employee}</td><td><b>${formatPrice(s.final_price)}</b></td>
+      <td>${s.payment_method==='cash'?'Наличные':s.payment_method==='card'?'Карта':'Кредит'}</td>
+      <td><button class="btn btn-sm btn-blue" onclick="viewContract(${s.id})"> Договор</button></td>
+    </tr>`).join('')}</tbody></table>
+
+    <div id="saleModal" class="modal"><div class="modal-content">
+      <div class="modal-header"><h3> Оформление сделки</h3><span class="modal-close" onclick="closeSaleModal()">&times;</span></div>
+
+      <div class="form-row"><label> Поиск по VIN</label><input id="saleVinSearch" placeholder="Введите VIN или его часть..." oninput="findCarByVin()"></div>
+      <div id="carSearchResult"></div>
+
+      <div class="form-row"><label> Или выберите из наличия (${_availableCars.length} авто)</label>
+        <select id="saleCarSelect" onchange="onCarSelect()"><option value="">— Выберите автомобиль —</option>
+        ${_availableCars.map(c=>`<option value="${c.id}" data-price="${c.price}">${c.brand} ${c.model} (${c.year}) — ${formatPrice(c.price)} — ${c.color} — VIN: ${c.vin}</option>`).join('')}</select>
+      </div>
+
+      <div id="selectedCarInfo" class="car-info-block hidden"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="form-row"><label> Клиент</label>
+          <select id="saleClient"><option value="">— Выберите —</option>${_clients.map(cl=>`<option value="${cl.id}">${cl.full_name} (${cl.phone})</option>`).join('')}</select>
+          <button class="btn btn-sm btn-orange" onclick="quickAddClient()" style="margin-top:5px">+ Быстрое добавление</button>
+        </div>
+        <div class="form-row"><label> Сотрудник</label>
+          <select id="saleEmployee"><option value="">— Выберите —</option>${_employees.map(e=>`<option value="${e.id}">${e.full_name} — ${e.position}</option>`).join('')}</select>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div class="form-row"><label> Итоговая цена (₽)</label><input id="salePrice" type="number" placeholder="0"></div>
+        <div class="form-row"><label> Дата сделки</label><input id="saleDate" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
+        <div class="form-row"><label> Способ оплаты</label><select id="salePayment"><option value="cash">Наличные</option><option value="card">Карта</option><option value="credit">Кредит</option></select></div>
+      </div>
+
+      <div class="form-row"><label> Комментарий</label><textarea id="saleComment" placeholder="Дополнительная информация..."></textarea></div>
+
+      <button class="btn" onclick="saveSale()" style="width:100%;padding:12px;justify-content:center;font-size:16px">✅ Оформить сделку</button>
+    </div></div>
+
+    <div id="clientQuickModal" class="modal"><div class="modal-content">
+      <div class="modal-header"><h3>Быстрое добавление клиента</h3><span class="modal-close" onclick="document.getElementById('clientQuickModal').style.display='none'">&times;</span></div>
+      <div class="form-row"><label>ФИО *</label><input id="qClientName"></div>
+      <div class="form-row"><label>Телефон *</label><input id="qClientPhone"></div>
+      <div class="form-row"><label>Паспорт</label><input id="qClientPassport"></div>
+      <button class="btn" onclick="saveQuickClient()"> Сохранить и выбрать</button>
+    </div></div>
+
+    <div id="contractModal" class="modal"><div class="modal-content" id="contractContent" style="max-width:800px"></div></div>`;
+}
+
+async function findCarByVin() {
+  const vin = document.getElementById('saleVinSearch').value.trim();
+  const resultDiv = document.getElementById('carSearchResult');
+  if (vin.length < 3) { resultDiv.innerHTML = ''; return; }
+
+  const found = _availableCars.find(c => c.vin.toUpperCase().includes(vin.toUpperCase()));
+  if (found) {
+    resultDiv.innerHTML = `<div class="car-info-block" style="border-left-color:#27ae60">
+      ✅ <b>${found.brand} ${found.model}</b> (${found.year}), ${found.color}<br>
+      Цена: <b>${formatPrice(found.price)}</b> | VIN: ${found.vin}
+      <button class="btn btn-sm" onclick="selectFoundCar(${found.id})" style="margin-left:10px">Выбрать</button>
+    </div>`;
+  } else if (vin.length >= 5) {
+    resultDiv.innerHTML = `<div style="color:#e74c3c;padding:5px"> Автомобиль с VIN "${vin}" не найден в наличии</div>`;
+  } else {
+    resultDiv.innerHTML = '';
+  }
+}
+
+function selectFoundCar(carId) {
+  document.getElementById('saleCarSelect').value = carId;
+  onCarSelect();
+  document.getElementById('saleVinSearch').value = '';
+  document.getElementById('carSearchResult').innerHTML = '';
+}
+
+function onCarSelect() {
+  const sel = document.getElementById('saleCarSelect');
+  const opt = sel.options[sel.selectedIndex];
+  const infoDiv = document.getElementById('selectedCarInfo');
+  const priceInput = document.getElementById('salePrice');
+
+  if (sel.value && opt) {
+    const price = opt.dataset.price;
+    priceInput.value = price;
+    infoDiv.classList.remove('hidden');
+    infoDiv.innerHTML = `✅ Выбран: <b>${opt.text}</b>`;
+  } else {
+    infoDiv.classList.add('hidden');
+    priceInput.value = '';
+  }
+}
+
+function closeSaleModal() { document.getElementById('saleModal').style.display = 'none'; }
+function openSaleModal() {
+  document.getElementById('saleModal').style.display = 'block';
+  document.getElementById('saleVinSearch').value = '';
+  document.getElementById('carSearchResult').innerHTML = '';
+  document.getElementById('saleCarSelect').value = '';
+  document.getElementById('salePrice').value = '';
+  document.getElementById('saleClient').value = '';
+  document.getElementById('saleEmployee').value = '';
+  document.getElementById('saleComment').value = '';
+  document.getElementById('selectedCarInfo').classList.add('hidden');
+}
+
+async function saveSale() {
+  const carSelect = document.getElementById('saleCarSelect');
+  const car_id = carSelect.value;
+  const client_id = document.getElementById('saleClient').value;
+  const employee_id = document.getElementById('saleEmployee').value;
+  const final_price = Number(document.getElementById('salePrice').value);
+  const sale_date = document.getElementById('saleDate').value;
+  const payment_method = document.getElementById('salePayment').value;
+  const comment = document.getElementById('saleComment').value.trim();
+
+  if (!car_id) return toast('Выберите автомобиль', 'error');
+  if (!client_id) return toast('Выберите клиента', 'error');
+  if (!employee_id) return toast('Выберите сотрудника', 'error');
+  if (!final_price || final_price <= 0) return toast('Укажите корректную цену', 'error');
+
+  try {
+    const result = await api('/api/sales', 'POST', { car_id: Number(car_id), client_id: Number(client_id), employee_id: Number(employee_id), final_price, sale_date, payment_method, comment: comment || null });
+    toast(`✅ Сделка оформлена! ${result.car}`, 'success');
+    closeSaleModal();
+    showTab('sales');
+  } catch(e) {}
+}
+
+function quickAddClient() {
+  document.getElementById('qClientName').value = '';
+  document.getElementById('qClientPhone').value = '';
+  document.getElementById('qClientPassport').value = '';
+  document.getElementById('clientQuickModal').style.display = 'block';
+}
+async function saveQuickClient() {
+  const body = {
+    full_name: document.getElementById('qClientName').value.trim(),
+    phone: document.getElementById('qClientPhone').value.trim(),
+    passport: document.getElementById('qClientPassport').value.trim() || null
+  };
+  if (!body.full_name || !body.phone) return toast('ФИО и телефон обязательны', 'error');
+  try {
+    const res = await api('/api/clients', 'POST', body);
+    toast('Клиент добавлен');
+    document.getElementById('clientQuickModal').style.display = 'none';
+    // Обновляем список клиентов
+    _clients = await api('/api/clients');
+    const sel = document.getElementById('saleClient');
+    sel.innerHTML = '<option value="">— Выберите —</option>' + _clients.map(cl => `<option value="${cl.id}">${cl.full_name} (${cl.phone})</option>`).join('');
+    sel.value = res.id;
+  } catch(e) {}
+}
+
+async function viewContract(saleId) {
+  try {
+    const s = await api('/api/sales/'+saleId);
+    document.getElementById('contractContent').innerHTML = `
+      <div class="modal-header"><h3> Договор купли-продажи №${s.id}</h3><span class="modal-close" onclick="document.getElementById('contractModal').style.display='none'">&times;</span></div>
+      <div class="contract-preview" id="printContract">
+        <h3>ДОГОВОР КУПЛИ-ПРОДАЖИ АВТОМОБИЛЯ №${s.id}</h3>
+        <p><b>Дата:</b> ${formatDate(s.sale_date)}</p>
+        <p><b>Продавец:</b> Автосалон, в лице ${s.employee} (${s.employee_position})</p>
+        <p><b>Покупатель:</b> ${s.client}, паспорт: ${s.client_passport || '—'}, адрес: ${s.client_address || '—'}, тел: ${s.client_phone}</p>
+        <p><b>Автомобиль:</b> ${s.brand} ${s.model}, ${s.car_year} г.в., VIN: ${s.vin}, цвет: ${s.color || '—'}</p>
+        <p><b>Цена:</b> ${formatPrice(s.final_price)}</p>
+        <p><b>Способ оплаты:</b> ${s.payment_method==='cash'?'Наличные':s.payment_method==='card'?'Банковская карта':'Кредит'}</p>
+        ${s.comment ? `<p><b>Примечание:</b> ${s.comment}</p>` : ''}
+        <br><br>
+        <p>Продавец: _______________ &nbsp;&nbsp;&nbsp; Покупатель: _______________</p>
+      </div>
+      <button class="btn btn-blue" onclick="window.print()"> Печать договора</button>
+      <button class="btn" onclick="document.getElementById('contractModal').style.display='none'">Закрыть</button>`;
+    document.getElementById('contractModal').style.display = 'block';
+  } catch(e) {}
+}
+
+async function loadReports(c) {
+  const employees = await api('/api/employees');
+  c.innerHTML = `
+    <div class="section-title"> Отчёты о продажах</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px">
+      <div class="form-row"><label>Дата с</label><input type="date" id="repStart"></div>
+      <div class="form-row"><label>Дата по</label><input type="date" id="repEnd"></div>
+      <div class="form-row"><label>Сотрудник</label><select id="repEmployee"><option value="">Все</option>${employees.map(e=>`<option value="${e.id}">${e.full_name}</option>`).join('')}</select></div>
+    </div>
+    <button class="btn" onclick="loadReport()"> Сформировать отчёт</button>
+    <button class="btn btn-blue" onclick="printReport()"> Печать отчёта</button>
+    <div id="reportResult" style="margin-top:20px"></div>`;
+}
+
+async function loadReport() {
+  const start = document.getElementById('repStart').value || '2000-01-01';
+  const end = document.getElementById('repEnd').value || '2099-12-31';
+  const emp = document.getElementById('repEmployee').value;
+  let url = `/api/reports/sales?start=${start}&end=${end}`;
+  if (emp) url += `&employee_id=${emp}`;
+
+  const data = await api(url);
+  const s = data.summary;
+  document.getElementById('reportResult').innerHTML = `
+    <div class="stats">
+      <div class="stat-box"><h2>${s.total_count}</h2><p>Всего продаж</p></div>
+      <div class="stat-box"><h2>${formatPrice(s.total_sum || 0)}</h2><p>Общая выручка</p></div>
+      <div class="stat-box"><h2>${formatPrice(Math.round(s.avg_price) || 0)}</h2><p>Средний чек</p></div>
+      <div class="stat-box"><h2>${formatPrice(s.min_price || 0)}</h2><p>Мин. цена</p><div class="sub">Макс: ${formatPrice(s.max_price || 0)}</div></div>
+    </div>
+
+    ${data.byEmployee?.length ? `<div class="chart-container"><h4> Продажи по сотрудникам</h4>
+      ${data.byEmployee.map(e=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee">
+        <span>${e.full_name}</span><span>${e.count} сделок — <b>${formatPrice(e.total)}</b></span></div>`).join('')}</div>` : ''}
+
+    ${data.byBrand?.length ? `<div class="chart-container"><h4> Продажи по маркам</h4>
+      ${data.byBrand.map(b=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee">
+        <span>${b.brand}</span><span>${b.count} шт. — <b>${formatPrice(b.total)}</b></span></div>`).join('')}</div>` : ''}
+
+    <div id="printableReport"><h4> Детализация продаж</h4>
+    <table><thead><tr><th>Дата</th><th>Автомобиль</th><th>VIN</th><th>Клиент</th><th>Сотрудник</th><th>Сумма</th></tr></thead><tbody>
+    ${data.rows.map(r=>`<tr><td>${formatDate(r.sale_date)}</td><td>${r.brand} ${r.model}</td><td>${r.vin}</td><td>${r.client}</td><td>${r.employee}</td><td><b>${formatPrice(r.final_price)}</b></td></tr>`).join('')}
+    </tbody></table></div>`;
+}
+
+function printReport() {
+  const report = document.getElementById('printableReport');
+  if (!report) return;
+  const win = window.open('', '_blank', 'width=900,height=700');
+  win.document.write('<html><head><title>Отчёт о продажах</title><meta charset="UTF-8"><style>body{font-family:Arial;padding:20px}table{width:100%;border-collapse:collapse}th,td{padding:8px;border:1px solid #000}th{background:#eee}</style></head><body>');
+  win.document.write(report.outerHTML);
+  win.document.write('</body></html>');
+  win.document.close();
+  win.print();
+}
+
+if (token) {
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  showTab('dashboard');
+}
+
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('modal')) e.target.style.display = 'none';
+});
+
+document.getElementById('loginPass').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') login();
+});
+</script>
+</body>
+</html>
